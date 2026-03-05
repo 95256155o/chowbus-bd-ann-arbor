@@ -20,20 +20,22 @@
       --brand-light: #fef2f2;
       --text-primary: #1f2937;
       --text-secondary: #9ca3af;
-      --border:      #f3f4f6;
+      --border:      #e5e7eb;
       --card-bg:     #ffffff;
       --white:       #ffffff;
       --shadow-card: 0 1px 2px rgba(0,0,0,0.06);
       --shadow-hover: 0 4px 12px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05);
 
-      --hot-bg:     #f43f5e;
-      --warm-bg:    #fb923c;
-      --cool-bg:    #60a5fa;
+      --hot-bg:      #dc2626;
+      --hot-warm-bg: #ea7c1e;
+      --warm-bg:     #ca8a04;
+      --cool-warm-bg:#4a9a6e;
+      --cool-bg:     #6b7280;
 
-      --fit-high-bg:   #4ade80;
-      --fit-high-text: #166534;
-      --fit-med-bg:    #fcd34d;
-      --fit-med-text:  #92400e;
+      --fit-high-bg:   #374151;
+      --fit-high-text: #ffffff;
+      --fit-med-bg:    #374151;
+      --fit-med-text:  #ffffff;
 
       --radius-sm: 6px;
       --radius-md: 8px;
@@ -101,7 +103,7 @@
       text-transform: uppercase;
     }
     .header-badge {
-      background: var(--brand);
+      background: #1f2937;
       border-radius: var(--radius-sm);
       padding: 5px 14px;
       font-size: 11px;
@@ -163,9 +165,11 @@
       height: 10px;
       border-radius: 50%;
     }
-    .legend-dot.hot  { background: var(--hot-bg); }
-    .legend-dot.warm { background: var(--warm-bg); }
-    .legend-dot.cool { background: var(--cool-bg); }
+    .legend-dot.hot       { background: var(--hot-bg); }
+    .legend-dot.hot-warm  { background: var(--hot-warm-bg); }
+    .legend-dot.warm      { background: var(--warm-bg); }
+    .legend-dot.cool-warm { background: var(--cool-warm-bg); }
+    .legend-dot.cool      { background: var(--cool-bg); }
 
     /* Leaflet popup light theme */
     .bd-popup .leaflet-popup-content-wrapper {
@@ -203,9 +207,11 @@
       border-radius: 50%;
       background: rgba(255,255,255,0.7);
     }
-    .temp-badge.hot  { background: var(--hot-bg); }
-    .temp-badge.warm { background: var(--warm-bg); }
-    .temp-badge.cool { background: var(--cool-bg); }
+    .temp-badge.hot       { background: var(--hot-bg); }
+    .temp-badge.hot-warm  { background: var(--hot-warm-bg); }
+    .temp-badge.warm      { background: var(--warm-bg); }
+    .temp-badge.cool-warm { background: var(--cool-warm-bg); }
+    .temp-badge.cool      { background: var(--cool-bg); }
 
     /* ========================================================
        PRIORITY TABLE
@@ -213,7 +219,7 @@
     .priority-section { margin-bottom: 40px; }
     .priority-table-wrap {
       background: var(--white);
-      border: 1px solid #f3f4f6;
+      border: 1px solid #e5e7eb;
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-card);
@@ -260,12 +266,12 @@
     .priority-num.p1,
     .priority-num.p2,
     .priority-num.p3,
-    .priority-num.p4 { background: var(--hot-bg); }
+    .priority-num.p4,
     .priority-num.p5,
     .priority-num.p6,
-    .priority-num.p7 { background: var(--warm-bg); }
+    .priority-num.p7,
     .priority-num.p8,
-    .priority-num.p9 { background: var(--cool-bg); }
+    .priority-num.p9 { background: #6b7280; }
 
     .priority-reason { font-size: 12px; color: var(--text-secondary); }
     .priority-restaurant { font-weight: 600; color: var(--text-primary); }
@@ -280,7 +286,7 @@
     }
     .restaurant-card {
       background: var(--white);
-      border: 1px solid #f3f4f6;
+      border: 1px solid #e5e7eb;
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-card);
@@ -307,7 +313,7 @@
       font-weight: 700;
       letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: var(--brand);
+      color: var(--text-secondary);
       margin-bottom: 4px;
     }
     .card-name {
@@ -358,9 +364,9 @@
 
     /* BD Notes block */
     .bd-notes-block {
-      background: #fef9f0;
-      border: 1px solid #fde68a;
-      border-left: 3px solid #f59e0b;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-left: 3px solid #374151;
       border-radius: var(--radius-sm);
       padding: 9px 12px;
       margin-top: 4px;
@@ -373,7 +379,7 @@
       font-weight: 700;
       letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: #b45309;
+      color: #6b7280;
       margin-bottom: 4px;
     }
 
@@ -385,9 +391,9 @@
       margin-top: 2px;
     }
     .pain-chip {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #374151;
       font-size: 11px;
       font-weight: 500;
       padding: 2px 8px;
@@ -396,7 +402,7 @@
 
     /* Pitch angle */
     .pitch-angle-value {
-      background: #fef2f2;
+      background: #f3f4f6;
       border-radius: var(--radius-sm);
       padding: 5px 8px;
       flex: 1;
@@ -506,9 +512,9 @@
       display: flex;
       flex-direction: column;
     }
-    .phase-card.phase-1 { border-top-color: #60a5fa; }
-    .phase-card.phase-2 { border-top-color: #fb923c; }
-    .phase-card.phase-3 { border-top-color: #4ade80; }
+    .phase-card.phase-1 { border-top-color: #374151; }
+    .phase-card.phase-2 { border-top-color: #374151; }
+    .phase-card.phase-3 { border-top-color: #374151; }
 
     .phase-header { margin-bottom: 14px; }
     .phase-number-badge {
@@ -523,9 +529,9 @@
       margin-bottom: 10px;
       flex-shrink: 0;
     }
-    .phase-card.phase-1 .phase-number-badge { background: #dbeafe; color: #2563eb; }
-    .phase-card.phase-2 .phase-number-badge { background: #ffedd5; color: #ea580c; }
-    .phase-card.phase-3 .phase-number-badge { background: #dcfce7; color: #16a34a; }
+    .phase-card.phase-1 .phase-number-badge { background: #e5e7eb; color: #374151; }
+    .phase-card.phase-2 .phase-number-badge { background: #e5e7eb; color: #374151; }
+    .phase-card.phase-3 .phase-number-badge { background: #e5e7eb; color: #374151; }
 
     .phase-title-line {
       display: flex;
@@ -549,9 +555,9 @@
       border-radius: 20px;
       flex-shrink: 0;
     }
-    .phase-card.phase-1 .phase-daterange { background: #dbeafe; color: #2563eb; }
-    .phase-card.phase-2 .phase-daterange { background: #ffedd5; color: #ea580c; }
-    .phase-card.phase-3 .phase-daterange { background: #dcfce7; color: #16a34a; }
+    .phase-card.phase-1 .phase-daterange { background: #f3f4f6; color: #6b7280; }
+    .phase-card.phase-2 .phase-daterange { background: #f3f4f6; color: #6b7280; }
+    .phase-card.phase-3 .phase-daterange { background: #f3f4f6; color: #6b7280; }
 
     .phase-activities {
       list-style: none;
@@ -575,7 +581,7 @@
       margin-top: 3px;
       font-size: 9px;
       font-style: normal;
-      color: var(--brand);
+      color: #9ca3af;
     }
 
     .phase-outcomes {
@@ -654,6 +660,14 @@
       .map-section { display: none; }
       .cards-grid { grid-template-columns: 1fr; gap: 12px; }
       .restaurant-card { break-inside: avoid; box-shadow: none; }
+    }
+
+    /* ========================================================
+       MAP TILE DESATURATION
+    ======================================================== */
+    .leaflet-tile,
+    .leaflet-tile-container img {
+      filter: grayscale(100%) brightness(1.05) contrast(0.9);
     }
   </style>
 </head>
@@ -790,7 +804,7 @@
         <span class="section-label-line"></span>
       </div>
       <p class="map-subtitle">Pin numbers = BD Priority rank. Addresses approximate.</p>
-      <div id="bd-map" style="height:500px;width:100%;border-radius:10px;border:1px solid #f3f4f6;"></div>
+      <div id="bd-map" style="height:500px;width:100%;border-radius:10px;border:1px solid #e5e7eb;"></div>
       <div class="map-legend">
         <span class="legend-dot hot"></span> HOT &nbsp;
         <span class="legend-dot warm"></span> WARM &nbsp;
@@ -842,7 +856,7 @@
             <tr>
               <td><span class="priority-num p5">5</span></td>
               <td class="priority-restaurant">Gai's Kitchen</td>
-              <td><span class="temp-badge warm">WARM-TO-HOT</span></td>
+              <td><span class="temp-badge hot-warm">WARM-TO-HOT</span></td>
               <td class="priority-reason">Never chose their POS — inherited legacy system, open to first evaluation</td>
             </tr>
             <tr>
@@ -860,7 +874,7 @@
             <tr>
               <td><span class="priority-num p8">8</span></td>
               <td class="priority-restaurant">China King</td>
-              <td><span class="temp-badge cool">COOL-TO-WARM</span></td>
+              <td><span class="temp-badge cool-warm">COOL-TO-WARM</span></td>
               <td class="priority-reason">Relationship-first play — loyalty program is the best opening hook</td>
             </tr>
             <tr>
@@ -1355,7 +1369,7 @@
               <p class="card-review-blurb">"A newer entry with rave reviews for authentic Chinese food. Described as 'absolutely delicious.'"</p>
             </div>
             <div class="card-header-badges">
-              <span class="temp-badge warm">WARM-TO-HOT</span>
+              <span class="temp-badge hot-warm">WARM-TO-HOT</span>
               <span class="fit-badge fit-medium">Chowbus Fit: MEDIUM</span>
             </div>
           </div>
@@ -1414,7 +1428,7 @@
               <p class="card-review-blurb">"A crowd favorite praised for awesome, authentic Chinese food. Frequently called the best in Ann Arbor by loyal customers."</p>
             </div>
             <div class="card-header-badges">
-              <span class="temp-badge cool">COOL-TO-WARM</span>
+              <span class="temp-badge cool-warm">COOL-TO-WARM</span>
               <span class="fit-badge fit-medium">Chowbus Fit: MEDIUM</span>
             </div>
           </div>
@@ -1470,7 +1484,7 @@
 
   <footer class="site-footer">
     Chowbus Market Intelligence &middot; Ann Arbor, MI Chinese Restaurant Vertical &middot; 2026 &middot;
-    <strong style="color:var(--brand);">All BD field data is fictional</strong>
+    <strong style="color:#374151;">All BD field data is fictional</strong>
   </footer>
 
 <script>
@@ -1497,7 +1511,15 @@
     { priority: 9,    name: "King Shing",             lat: 42.2450, lng: -83.6799, temp: "COOL", pos: "2865 Carpenter Rd",     pos_sys: "Lightspeed",         dm: "Helen Shing",     window: "3\u20135pm weekdays",           note: "Contract until Jan 2027. Plant seed now for renewal." },
   ];
 
-  var colorMap = { HOT: '#f43f5e', WARM: '#fb923c', COOL: '#60a5fa' };
+  var colorMap = {
+    'HOT':         '#dc2626',
+    'HOT-WARM':    '#ea7c1e',
+    'WARM-TO-HOT': '#ea7c1e',
+    'WARM':        '#ca8a04',
+    'COOL-WARM':   '#4a9a6e',
+    'COOL-TO-WARM':'#4a9a6e',
+    'COOL':        '#6b7280'
+  };
 
   restaurants.forEach(function(r) {
     var color = colorMap[r.temp] || '#888';
