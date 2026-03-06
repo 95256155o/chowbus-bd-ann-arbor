@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chowbus Market Intelligence — Ann Arbor, MI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #f43f5e;
+      --brand-light: #fef2f2;
+      --text-primary: #1f2937;
+      --text-secondary: #9ca3af;
+      --border:      #e5e7eb;
+      --card-bg:     #ffffff;
+      --white:       #ffffff;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05);
+
+      --hot-bg:      #dc2626;
+      --hot-warm-bg: #ea7c1e;
+      --warm-bg:     #ca8a04;
+      --cool-warm-bg:#4a9a6e;
+      --cool-bg:     #60a5fa;
+
+      --fit-high-bg:   #16a34a;
+      --fit-high-text: #ffffff;
+      --fit-med-bg:    #374151;
+      --fit-med-text:  #ffffff;
+
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--white);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ========================================================
+       DISCLAIMER BANNER
+    ======================================================== */
+    .disclaimer-banner {
+      background: #fef2f2;
+      color: #f43f5e;
+      text-align: center;
+      padding: 6px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1100;
+      border-bottom: 1px solid #fecdd3;
+    }
+
+    /* ========================================================
+       STICKY HEADER
+    ======================================================== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--white);
+      border-bottom: 3px solid #f43f5e;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left { display: flex; flex-direction: column; gap: 2px; }
+    .header-title {
+      font-size: clamp(14px, 2vw, 19px);
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .header-subtitle {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .header-badge {
+      background: #1f2937;
+      border-radius: var(--radius-sm);
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    /* ========================================================
+       MAIN CONTAINER
+    ======================================================== */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    /* ========================================================
+       SECTION LABELS
+    ======================================================== */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-label-text {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .section-label-line {
+      flex: 1;
+      height: 1px;
+      background: #f3f4f6;
+    }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: #f43f5e;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ========================================================
+       MAP TILE — 淡雅原色 (Transparent Light)
+    ======================================================== */
+    .leaflet-container {
+      background-color: #ffffff !important;
+    }
+
+    /* ========================================================
+       MAP SECTION
+    ======================================================== */
+    .map-section { margin: 2rem 0; }
+    .map-subtitle { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; }
+    .map-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .legend-dot.hot       { background: var(--hot-bg); }
+    .legend-dot.hot-warm  { background: var(--hot-warm-bg); }
+    .legend-dot.warm      { background: var(--warm-bg); }
+    .legend-dot.cool-warm { background: var(--cool-warm-bg); }
+    .legend-dot.cool      { background: var(--cool-bg); }
+
+    /* Leaflet popup light theme */
+    .bd-popup .leaflet-popup-content-wrapper {
+      background: #ffffff;
+      border: 1px solid #f3f4f6;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-hover);
+      padding: 0;
+    }
+    .bd-popup .leaflet-popup-content { margin: 0; }
+    .bd-popup .leaflet-popup-tip { background: #ffffff; }
+    .bd-popup .leaflet-popup-close-button { color: var(--text-secondary) !important; }
+
+    /* ========================================================
+       LEAD TEMP BADGE
+    ======================================================== */
+    .temp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: #ffffff;
+    }
+    .temp-badge::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+    }
+    .temp-badge.hot       { background: var(--hot-bg); }
+    .temp-badge.hot-warm  { background: var(--hot-warm-bg); }
+    .temp-badge.warm      { background: var(--warm-bg); }
+    .temp-badge.cool-warm { background: var(--cool-warm-bg); }
+    .temp-badge.cool      { background: var(--cool-bg); }
+
+    /* ========================================================
+       PRIORITY TABLE
+    ======================================================== */
+    .priority-section { margin-bottom: 40px; }
+    .priority-table-wrap {
+      background: var(--white);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .priority-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .priority-table thead tr {
+      background: #f9fafb;
+    }
+    .priority-table th {
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #1f2937;
+    }
+    .priority-table tbody tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.15s ease;
+    }
+    .priority-table tbody tr:last-child { border-bottom: none; }
+    .priority-table tbody tr:hover { background: #fff1f2; }
+    .priority-table td {
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .priority-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    /* Priority num background colors set via inline styles per row, matching lead temp */
+
+    .priority-reason { font-size: 12px; color: var(--text-secondary); }
+    .priority-restaurant { font-weight: 600; color: var(--text-primary); }
+
+    /* ========================================================
+       CARDS GRID
+    ======================================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .restaurant-card {
+      background: var(--white);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .restaurant-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      padding: 16px 20px 12px;
+      background: #fafafa;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-header-left { flex: 1; min-width: 0; }
+    .card-rank {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #f43f5e;
+      margin-bottom: 4px;
+    }
+    .card-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 5px;
+    }
+    .card-review-blurb {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .card-body { padding: 12px 20px; flex: 1; }
+
+    .field-group { margin-bottom: 14px; }
+    .field-group-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 7px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .field-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 3px 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .field-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 11.5px;
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+    .field-value {
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    /* BD Notes block */
+    .bd-notes-block {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 3px solid #d97706;
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #78350f;
+      line-height: 1.6;
+    }
+    .bd-notes-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #92400e;
+      margin-bottom: 4px;
+    }
+
+    /* Pain points */
+    .pain-points-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 2px;
+    }
+    .pain-chip {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #e11d48;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* Pitch angle */
+    .pitch-angle-value {
+      background: #f0fdf4;
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      flex: 1;
+      color: #166534;
+      font-size: 12px;
+      line-height: 1.55;
+      display: block;
+      border-left: 2px solid #16a34a;
+    }
+
+    /* ========================================================
+       CHOWBUS FIT BADGE
+    ======================================================== */
+    .fit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .fit-badge::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.18);
+    }
+    .fit-badge.fit-high   { background: var(--fit-high-bg); color: var(--fit-high-text); }
+    .fit-badge.fit-medium { background: var(--fit-med-bg);  color: var(--fit-med-text); }
+
+    .card-header-badges {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    /* ========================================================
+       CHOWBUS VALUE PROP STRIP (minimal)
+    ======================================================== */
+    .chowbus-vp-strip {
+      margin-bottom: 28px;
+    }
+    .chowbus-vp-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    .chowbus-vp-pills {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #e11d48;
+    }
+    .chowbus-vp-sep {
+      color: #fecdd3;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    /* ========================================================
+       90-DAY PLAN SECTION
+    ======================================================== */
+    .playbook-section { margin-bottom: 28px; }
+    .playbook-section-header { margin-bottom: 20px; }
+    .playbook-main-title {
+      font-size: clamp(16px, 2.2vw, 21px);
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .playbook-main-title-zh {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-left: 10px;
+      opacity: 0.7;
+    }
+    .playbook-phases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 4px;
+    }
+    .phase-card {
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      padding: 20px;
+      border: 1px solid #f3f4f6;
+      border-top-width: 3px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+    .phase-card.phase-1 { border-top-color: #f43f5e; }
+    .phase-card.phase-2 { border-top-color: #f43f5e; }
+    .phase-card.phase-3 { border-top-color: #f43f5e; }
+
+    .phase-header { margin-bottom: 14px; }
+    .phase-number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .phase-card.phase-1 .phase-number-badge { background: #fff1f2; color: #f43f5e; border: 1px solid #fecdd3; }
+    .phase-card.phase-2 .phase-number-badge { background: #fff1f2; color: #f43f5e; border: 1px solid #fecdd3; }
+    .phase-card.phase-3 .phase-number-badge { background: #fff1f2; color: #f43f5e; border: 1px solid #fecdd3; }
+
+    .phase-title-line {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 3px;
+    }
+    .phase-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .phase-daterange {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .phase-card.phase-1 .phase-daterange { background: #f3f4f6; color: #6b7280; }
+    .phase-card.phase-2 .phase-daterange { background: #f3f4f6; color: #6b7280; }
+    .phase-card.phase-3 .phase-daterange { background: #f3f4f6; color: #6b7280; }
+
+    .phase-activities {
+      list-style: none;
+      flex: 1;
+      margin: 0 0 16px 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .phase-activities li {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--text-primary);
+    }
+    .phase-activity-icon {
+      flex-shrink: 0;
+      margin-top: 3px;
+      font-size: 9px;
+      font-style: normal;
+      color: #9ca3af;
+    }
+
+    .phase-outcomes {
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-top: auto;
+      border: 1px solid transparent;
+    }
+    /* Phase 1 — Research: soft blue */
+    .phase-1 .phase-outcomes {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .phase-1 .phase-outcomes-label { color: #1d4ed8; }
+    .phase-1 .phase-outcomes-list li::before { background: #3b82f6; }
+
+    /* Phase 2 — Relationships: soft amber */
+    .phase-2 .phase-outcomes {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .phase-2 .phase-outcomes-label { color: #b45309; }
+    .phase-2 .phase-outcomes-list li::before { background: #d97706; }
+
+    /* Phase 3 — Close: soft green */
+    .phase-3 .phase-outcomes {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .phase-3 .phase-outcomes-label { color: #166534; }
+    .phase-3 .phase-outcomes-list li::before { background: #16a34a; }
+    .phase-outcomes-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+      color: var(--text-secondary);
+    }
+    .phase-outcomes-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .phase-outcomes-list li {
+      font-size: 11.5px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+    }
+    .phase-outcomes-list li::before {
+      content: '\2013';
+      flex-shrink: 0;
+      font-size: 10px;
+      margin-top: 2px;
+      color: var(--text-secondary);
+    }
+
+    /* ========================================================
+       FOOTER
+    ======================================================== */
+    .site-footer {
+      background: #f9fafb;
+      border-top: 1px solid #f3f4f6;
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    /* ========================================================
+       LINK HOVER ACCENT
+    ======================================================== */
+    .field-value a,
+    .card-body a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: #fecdd3;
+      transition: color 0.2s ease;
+    }
+    .field-value a:hover,
+    .card-body a:hover {
+      color: #f43f5e;
+      text-decoration-color: #f43f5e;
+    }
+
+    /* ========================================================
+       RESPONSIVE
+    ======================================================== */
+    @media (max-width: 900px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .playbook-phases-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .site-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header-badge { display: none; }
+      .field-label { min-width: 90px; font-size: 11px; }
+      .priority-table th, .priority-table td { padding: 7px 10px; font-size: 11.5px; }
+      .card-header-badges { flex-direction: row; }
+    }
+
+    /* ========================================================
+       PRINT
+    ======================================================== */
+    @media print {
+      .disclaimer-banner { position: static; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .site-header { position: static; }
+      .map-section { display: none; }
+      .cards-grid { grid-template-columns: 1fr; gap: 12px; }
+      .restaurant-card { break-inside: avoid; box-shadow: none; }
+    }
+
+    /* ========================================================
+       MAP TILE - 淡雅原色 (Faded Pastel)
+    ======================================================== */
+    .leaflet-container {
+      background-color: #ffffff !important;
+    }
+    .leaflet-tile,
+    .leaflet-tile-container img {
+      filter: opacity(65%) saturate(85%);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DISCLAIMER BANNER -->
+  <div class="disclaimer-banner" role="alert">
+    DEMO DOCUMENT &mdash; Field intelligence data is fictional. Restaurant names and Chowbus product info are real.
+  </div>
+
+  <!-- STICKY HEADER -->
+  <header class="site-header" role="banner">
+    <div class="header-left">
+      <h1 class="header-title">Chowbus Market Intelligence &mdash; Ann Arbor, MI</h1>
+      <p class="header-subtitle">Chinese Restaurant Vertical &middot; Ohio Region</p>
+    </div>
+    <div class="header-badge">10 Accounts &bull; 2026</div>
+  </header>
+
+  <main class="main-container" role="main">
+
+    <!-- ===== CHOWBUS VALUE PROP STRIP ===== -->
+    <div class="chowbus-vp-strip" aria-label="Chowbus value proposition">
+      <div class="chowbus-vp-title">Why Chowbus Wins &nbsp;为什么选择Chowbus</div>
+      <div class="chowbus-vp-pills">
+        <span>Asian Restaurant DNA</span>
+        <span class="chowbus-vp-sep">&middot;</span>
+        <span>Bilingual Mandarin UI</span>
+        <span class="chowbus-vp-sep">&middot;</span>
+        <span>POS + Delivery + Loyalty in One</span>
+        <span class="chowbus-vp-sep">&middot;</span>
+        <span>10,000+ Partners Nationwide</span>
+      </div>
+    </div>
+
+    <!-- ===== 90-DAY FIELD PLAN ===== -->
+    <section class="playbook-section" aria-label="First 90 Days Field Plan">
+      <div class="section-label">
+        <span class="section-label-text">Field Strategy — First 90 Days</span>
+        <span class="section-label-line"></span>
+      </div>
+
+      <div class="playbook-section-header">
+        <h2 class="playbook-main-title">
+          My First 90 Days &mdash; Ann Arbor Chinese Restaurant Vertical
+          <span class="playbook-main-title-zh">中餐厅市场拓展计划</span>
+        </h2>
+      </div>
+
+      <div class="playbook-phases-grid">
+
+        <!-- PHASE 1 -->
+        <div class="phase-card phase-1">
+          <div class="phase-header">
+            <div class="phase-number-badge">1</div>
+            <div class="phase-title-line">
+              <span class="phase-title">Embed &amp; Research</span>
+              <span class="phase-daterange">Days 1–30</span>
+            </div>
+          </div>
+          <ul class="phase-activities">
+            <li><span class="phase-activity-icon">&#9679;</span>Shadow team; master Chowbus product &amp; pricing</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Join U of M Chinese WeChat groups</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Incognito visits to all 10 accounts; confirm DM windows</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Target: 1 signed account OR full local market report delivered</li>
+          </ul>
+          <div class="phase-outcomes">
+            <div class="phase-outcomes-label">Expected Outcomes</div>
+            <ul class="phase-outcomes-list">
+              <li>10 accounts scouted</li>
+              <li>3+ WeChat groups joined</li>
+              <li>1 close attempted or comprehensive report delivered</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PHASE 2 -->
+        <div class="phase-card phase-2">
+          <div class="phase-header">
+            <div class="phase-number-badge">2</div>
+            <div class="phase-title-line">
+              <span class="phase-title">Build Relationships</span>
+              <span class="phase-daterange">Days 31–60</span>
+            </div>
+          </div>
+          <ul class="phase-activities">
+            <li><span class="phase-activity-icon">&#9679;</span>Return visits; become a familiar face at top 6 accounts</li>
+            <li><span class="phase-activity-icon">&#9679;</span>WeChat: staff &rarr; manager &rarr; owner (organic only)</li>
+            <li><span class="phase-activity-icon">&#9679;</span>2 formal Chowbus demos booked</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Mandarin demo at Asian Legend</li>
+          </ul>
+          <div class="phase-outcomes">
+            <div class="phase-outcomes-label">Expected Outcomes</div>
+            <ul class="phase-outcomes-list">
+              <li>2 demos completed</li>
+              <li>5+ WeChat contacts</li>
+              <li>Pipeline stages updated weekly</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PHASE 3 -->
+        <div class="phase-card phase-3">
+          <div class="phase-header">
+            <div class="phase-number-badge">3</div>
+            <div class="phase-title-line">
+              <span class="phase-title">Close &amp; Report</span>
+              <span class="phase-daterange">Days 61–90</span>
+            </div>
+          </div>
+          <ul class="phase-activities">
+            <li><span class="phase-activity-icon">&#9679;</span>Close TK Wu (lapsed contract) and Palace Tang (renewal due)</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Pitch Evergreen as multi-location account (2 locations, 1 deal)</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Weekly field report delivered to regional manager</li>
+            <li><span class="phase-activity-icon">&#9679;</span>Map expansion: survey Ypsilanti / Washtenaw County</li>
+          </ul>
+          <div class="phase-outcomes">
+            <div class="phase-outcomes-label">Expected Outcomes</div>
+            <ul class="phase-outcomes-list">
+              <li>2–3 accounts closed</li>
+              <li>Weekly report cadence live</li>
+              <li>Referral pipeline started</li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- /playbook-phases-grid -->
+    </section>
+
+    <!-- ===== MAP SECTION ===== -->
+    <section class="map-section" aria-label="Restaurants map">
+      <div class="section-label">
+        <span class="section-label-text">Field Coverage Map</span>
+        <span class="section-label-line"></span>
+      </div>
+      <p class="map-subtitle">Pin numbers = BD Priority rank. Addresses approximate.</p>
+      <div id="bd-map" style="height:500px;width:100%;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);overflow:hidden;"></div>
+      <div class="map-legend">
+        <span class="legend-dot hot"></span> HOT &nbsp;
+        <span class="legend-dot warm"></span> WARM &nbsp;
+        <span class="legend-dot cool"></span> COOL
+      </div>
+    </section>
+
+    <!-- ===== PRIORITY TABLE ===== -->
+    <section class="priority-section" aria-label="BD Priority Summary">
+      <div class="section-label">
+        <span class="section-label-text">BD Priority Summary</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="priority-table-wrap">
+        <table class="priority-table" aria-label="BD Priority ranking table">
+          <thead>
+            <tr>
+              <th scope="col">Priority</th>
+              <th scope="col">Restaurant</th>
+              <th scope="col">Lead Temp</th>
+              <th scope="col">Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="priority-num p1" style="background:#dc2626;">1</span></td>
+              <td class="priority-restaurant">Palace Tang</td>
+              <td><span class="temp-badge hot">HOT</span></td>
+              <td class="priority-reason">Renewal imminent (Mar 2026), DM actively shopping competitors</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p2" style="background:#dc2626;">2</span></td>
+              <td class="priority-restaurant">TK Wu</td>
+              <td><span class="temp-badge hot">HOT</span></td>
+              <td class="priority-reason">Possible lapsed Q4 2025 contract, owner frustrated with price hikes</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p3" style="background:#dc2626;">3</span></td>
+              <td class="priority-restaurant">Evergreen Downtown + Evergreen Restaurant</td>
+              <td><span class="temp-badge hot">HOT</span></td>
+              <td class="priority-reason">Multi-location strategic account, renewal approaching Q2 2026</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p4" style="background:#ea7c1e;">4</span></td>
+              <td class="priority-restaurant">Yee Siang Dumplings</td>
+              <td><span class="temp-badge hot">HOT</span></td>
+              <td class="priority-reason">On free Square tier, actively outgrowing it — DM dissatisfied</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p5" style="background:#ca8a04;">5</span></td>
+              <td class="priority-restaurant">Gai's Kitchen</td>
+              <td><span class="temp-badge hot-warm">WARM-TO-HOT</span></td>
+              <td class="priority-reason">Never chose their POS — inherited legacy system, open to first evaluation</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p6" style="background:#ca8a04;">6</span></td>
+              <td class="priority-restaurant">Lan City Handpulled Noodle</td>
+              <td><span class="temp-badge warm">WARM</span></td>
+              <td class="priority-reason">Month-to-month Clover, wants delivery integration — easy switch</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p7" style="background:#ca8a04;">7</span></td>
+              <td class="priority-restaurant">Asian Legend</td>
+              <td><span class="temp-badge warm">WARM</span></td>
+              <td class="priority-reason">Legacy Chinese-language POS, no US support — needs Mandarin demo</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p8" style="background:#4a9a6e;">8</span></td>
+              <td class="priority-restaurant">China King</td>
+              <td><span class="temp-badge cool-warm">COOL-TO-WARM</span></td>
+              <td class="priority-reason">Relationship-first play — loyalty program is the best opening hook</td>
+            </tr>
+            <tr>
+              <td><span class="priority-num p9" style="background:#60a5fa;">9</span></td>
+              <td class="priority-restaurant">King Shing</td>
+              <td><span class="temp-badge cool">COOL</span></td>
+              <td class="priority-reason">Long contract runway (Jan 2027) — nurture relationship for renewal</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== RESTAURANT CARDS ===== -->
+    <section class="cards-section" aria-label="Restaurant intelligence cards">
+      <div class="section-label">
+        <span class="section-label-text">Restaurant Intelligence Cards — 10 Accounts</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="cards-grid">
+
+        <!-- CARD 1: Evergreen Downtown -->
+        <article class="restaurant-card" aria-label="Evergreen Downtown" style="border-left: 3px solid #dc2626;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #1</div>
+              <h2 class="card-name">Evergreen Downtown</h2>
+              <p class="card-review-blurb">"Consistently rated the #1 Chinese restaurant in Ann Arbor. Great price-to-portion value, authentic dishes."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot">HOT</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">325 S Main St, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0182</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Thu 11am–9:30pm / Fri–Sat 11am–10:30pm / Sun 12pm–9pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2:30pm–4:30pm weekdays</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Toast (POS + Online Ordering bundle)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Q2 2026 — approaching window, high priority</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">4 terminals + 1 KDS</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$110,000</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Wei Zhang, Owner/Operator</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Yes — typically present during lunch and dinner service</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Yes — connected to local restaurant association</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Frustrated — slow Toast support, high monthly fees (~$350/mo)</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Support latency</span>
+                <span class="pain-chip">No Mandarin UI</span>
+                <span class="pain-chip">Expensive add-ons</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Never contacted</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Lead with bilingual Mandarin UI + multi-location dashboard. Replaces Toast's weak Chinese-language support and fragmented reporting.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Renewal approaching — time pressure works in our favor. DM active in Ann Arbor Restaurant Owners Facebook group; engage before formal pitch.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 2: Lan City -->
+        <article class="restaurant-card" aria-label="Lan City Handpulled Noodle" style="border-left: 3px solid #ca8a04;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #2</div>
+              <h2 class="card-name">Lan City Handpulled Noodle</h2>
+              <p class="card-review-blurb">"One of the best places for Chinese hand-pulled noodles in the area. A must-visit."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge warm">WARM</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">2080 W Stadium Blvd, Ann Arbor, MI 48103</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0247</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Tue–Sun 11am–8:30pm / Closed Monday</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">3pm–5pm Tue–Thu</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Clover (basic POS, no online ordering)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Month-to-month — no lock-in, easy switch</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">2 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$65,000</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Mei Lin, Co-Owner</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Yes — usually handles front-of-house 11am–3pm</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">No public profile — approach in person or via referral</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Neutral-to-negative — Clover lacks delivery integration</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">No delivery integration</span>
+                <span class="pain-chip">Limited reporting</span>
+                <span class="pain-chip">Clunky inventory</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Square rep visited ~4 months ago, no deal closed</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Integrated delivery is the exact gap Clover can't fill. Demo the delivery + online ordering bundle first — close in one visit.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Month-to-month is a clean opening. Find out why the Square rep failed to close; address that objection directly.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 3: Yee Siang Dumplings -->
+        <article class="restaurant-card" aria-label="Yee Siang Dumplings" style="border-left: 3px solid #dc2626;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #3</div>
+              <h2 class="card-name">Yee Siang Dumplings</h2>
+              <p class="card-review-blurb">"Widely regarded as having the best dumplings in Michigan. Top-tier with consistently high reviews."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot">HOT</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">518 E Liberty St, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0391</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Sun 11:30am–9pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2pm–5pm daily</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Square for Restaurants (free tier)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">N/A (free plan) — no contract, easy to switch</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">2 tablets</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$48,000</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">David Yee, Owner (2nd-gen family business)</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Yes — very hands-on, present almost every day</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">No — Instagram presence (@yeesiangdumplings)</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Actively dissatisfied — Square limits advanced reporting on free tier</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Outgrowing free tier</span>
+                <span class="pain-chip">No loyalty program</span>
+                <span class="pain-chip">Manual reconciliation</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">None on record</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Chowbus Loyalty is built-in vs Square's paid add-on. Pitch: "Same features, better price, built for Chinese restaurants."</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                DM is cost-conscious — lead with total cost of ownership vs Square paid tiers. Loyalty program is the strongest hook.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 4: King Shing -->
+        <article class="restaurant-card" aria-label="King Shing" style="border-left: 3px solid #60a5fa;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #4</div>
+              <h2 class="card-name">King Shing</h2>
+              <p class="card-review-blurb">"A highly rated staple known for legit soup dumplings. Delicious food across the board."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge cool">COOL</span>
+              <span class="fit-badge fit-medium">Chowbus Fit: MEDIUM</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">210 S Fourth Ave, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0153</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Fri 11am–10pm / Sat–Sun 10:30am–10:30pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">3pm–5pm weekdays</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Lightspeed Restaurant</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Jan 2027 — locked in, plant seed early</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">5 terminals + tableside ordering tablets</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$140,000 — busy downtown, weekend brunch spike</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Helen Shing, General Manager (silent investor owner)</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Yes — weekday lunches, confirm before visit</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Yes — connected to several Ann Arbor hospitality professionals</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Satisfied overall, frustrated with pricing hikes and limited local support</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Annual price increases</span>
+                <span class="pain-chip">Tablet sync issues</span>
+                <span class="pain-chip">Ticketing-only support</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Toast rep visited 8 months ago, politely declined</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Pitch Chowbus multi-terminal sync and real-time reporting vs Lightspeed's tablet sync issues. Plant seed for Jan 2027 renewal.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Helen is the real gatekeeper — owner is hands-off. Win Helen with case studies from comparable-volume restaurants.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 5: Asian Legend -->
+        <article class="restaurant-card" aria-label="Asian Legend" style="border-left: 3px solid #ca8a04;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #5</div>
+              <h2 class="card-name">Asian Legend</h2>
+              <p class="card-review-blurb">"A family-owned hidden gem specializing in Taiwanese and Sichuan cuisine. Known for Lou Ro Fan, scallion pancakes, and basil tofu."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge warm">WARM</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">1100 S University Ave, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0278</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Tue–Sun 11am–9pm / Closed Monday</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2:30pm–4:30pm Tue–Fri</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Manesifu (Chinese-language POS, imported)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Unknown — likely perpetual license, older on-premise system</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">2 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$42,000 — family-run, lean operation</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">James &amp; Amy Chen, Co-Owners (husband/wife)</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Both present most days — Amy (front), James (back)</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Not on LinkedIn — reachable via phone or walk-in</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Loyal to Manesifu for Chinese UI, but worried about lack of updates and no US support</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">No US support</span>
+                <span class="pain-chip">Outdated hardware</span>
+                <span class="pain-chip">No cloud backup</span>
+                <span class="pain-chip">No online ordering</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">None</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Strongest displacement case — Manesifu has no US support or cloud backup. Chowbus offers Mandarin UI + US support + cloud. Demo in Mandarin.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Mandarin-language demo is non-negotiable. Amy is the primary decision-influencer; James defers to her on operations.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 6: TK Wu -->
+        <article class="restaurant-card" aria-label="TK Wu" style="border-left: 3px solid #dc2626;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #6</div>
+              <h2 class="card-name">TK Wu</h2>
+              <p class="card-review-blurb">"Affordable and family-friendly with authentic Chinese flavors. Standouts: jalape&ntilde;o chicken, roast duck, mu shu pork."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot">HOT</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">2090 W Liberty St, Ann Arbor, MI 48103</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0334</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Sat 11am–9pm / Sun 12pm–8pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2pm–4pm Mon–Wed</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Revel Systems (iPad POS)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Q4 2025 — OVERDUE / possibly lapsed, verify</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">3 iPad stations</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$38,000 — high volume of small tickets</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Tommy Wu, Owner</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Usually — difficult to catch; often cooking during peak hours</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Not digitally active — best approach in-person, mid-afternoon</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Negative — Revel renewal spiked significantly; feels locked in and underserved</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Surprise price hike</span>
+                <span class="pain-chip">Hard to reach support</span>
+                <span class="pain-chip">No bilingual receipts</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Square rep left a flyer 2 months ago — no follow-up</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Lapsed contract = zero switching friction. Lead with transparent flat-rate pricing vs Revel's surprise hikes. Keep it simple and fast.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Possible lapsed contract is an immediate open door. Tommy is pragmatic — keep pitch short, lead with price and simplicity.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 7: Palace Tang -->
+        <article class="restaurant-card" aria-label="Palace Tang" style="border-left: 3px solid #dc2626;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #7</div>
+              <h2 class="card-name">Palace Tang</h2>
+              <p class="card-review-blurb">"Featured among Yelp's top Chinese food spots. Praised for authentic offerings and quality dishes."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot">HOT</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">47 E William St, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0419</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Sun 11am–10pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">3pm–5pm daily</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">TouchBistro (cloud-based)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Mar 2026 — IMMINENT, high urgency</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">4 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$75,000</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Richard Tang, Owner</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Weekday afternoons only — delegates evenings to floor manager</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Yes — connected to Ann Arbor Chamber of Commerce (warm intro possible)</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Actively shopping — already requested demos from two competitors</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Offline mode unreliable</span>
+                <span class="pain-chip">Limited table mgmt</span>
+                <span class="pain-chip">No loyalty program</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Toast and Square both demoed last month</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Competitive evaluation already underway — differentiate on: built for Asian restaurants, hot pot menu support, loyalty program built-in.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Move fast — DM is in active evaluation mode. Chamber of Commerce connection could yield a warm intro before competitors close the deal.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 8: Evergreen Restaurant -->
+        <article class="restaurant-card" aria-label="Evergreen Restaurant" style="border-left: 3px solid #dc2626;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #8</div>
+              <h2 class="card-name">Evergreen Restaurant</h2>
+              <p class="card-review-blurb">"Highly regarded for authentic Chinese food. Top pick by ThreeBestRated using their 50-point inspection."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot">HOT</span>
+              <span class="fit-badge fit-high">Chowbus Fit: HIGH</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">3011 Packard St, Ann Arbor, MI 48108</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0561</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Thu 11am–9pm / Fri–Sat 11am–10pm / Closed Sun</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2pm–4pm weekdays</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Toast (same brand as Evergreen Downtown — possibly same owner group)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Q2 2026 — aligned with Evergreen Downtown renewal</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">3 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$72,000</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Likely same ownership as Evergreen Downtown — confirm org structure</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Manager Kevin Liu handles day-to-day; owner visits weekly</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Manager visible on LinkedIn; owner not</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Same complaints as Downtown location — shared frustrations across both</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Fragmented multi-location mgmt</span>
+                <span class="pain-chip">No unified reporting</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Same owner as #1 — treat as one account</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Multi-location pitch: one Chowbus dashboard for both Evergreen locations. Toast cannot match Chowbus's unified multi-location view.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Strategic account — if same ownership as Downtown, closing one closes both. Confirm ownership structure before pitching.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 9: Gai's Kitchen -->
+        <article class="restaurant-card" aria-label="Gai's Kitchen" style="border-left: 3px solid #ea7c1e;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #9</div>
+              <h2 class="card-name">Gai's Kitchen</h2>
+              <p class="card-review-blurb">"A newer entry with rave reviews for authentic Chinese food. Described as 'absolutely delicious.'"</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge hot-warm">WARM-TO-HOT</span>
+              <span class="fit-badge fit-medium">Chowbus Fit: MEDIUM</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">719 N University Ave, Ann Arbor, MI 48104</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0683</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Wed–Mon 11am–8:30pm / Closed Tuesday</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2:30pm–4pm Wed–Fri</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Aloha by NCR (legacy system, inherited from previous tenant)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Unknown — Aloha often perpetual license or legacy agreement</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">2 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$31,000 — newer restaurant, still growing</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Gai Huang, Founder/Owner (opened 2023)</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Almost always — young owner-operator, very hands-on</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Yes — active, recently posted about restaurant growth milestones</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Inherited Aloha — never independently chose a POS; open to switching</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Aloha feels outdated</span>
+                <span class="pain-chip">No mobile/QR ordering</span>
+                <span class="pain-chip">No social integration</span>
+                <span class="pain-chip">Manual reporting</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">None</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Chowbus QR ordering + Google/Instagram integration is tailor-made for this digital-first young owner. Lead with the growth vision, not just the POS.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Digital-first pitch will land well — emphasize QR ordering, review integrations, and clean analytics built for growth.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 10: China King -->
+        <article class="restaurant-card" aria-label="China King" style="border-left: 3px solid #4a9a6e;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-rank">Account #10</div>
+              <h2 class="card-name">China King</h2>
+              <p class="card-review-blurb">"A crowd favorite praised for awesome, authentic Chinese food. Frequently called the best in Ann Arbor by loyal customers."</p>
+            </div>
+            <div class="card-header-badges">
+              <span class="temp-badge cool-warm">COOL-TO-WARM</span>
+              <span class="fit-badge fit-medium">Chowbus Fit: MEDIUM</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <div class="field-group-title">Location &amp; Hours</div>
+              <div class="field-row"><span class="field-label">Address</span><span class="field-value">1235 Traver Rd, Ann Arbor, MI 48105</span></div>
+              <div class="field-row"><span class="field-label">Phone</span><span class="field-value">(734) 555-0774</span></div>
+              <div class="field-row"><span class="field-label">Hours</span><span class="field-value">Mon–Sun 10:30am–9:30pm</span></div>
+              <div class="field-row"><span class="field-label">Best Visit</span><span class="field-value">2pm–4pm Mon–Thu</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">POS &amp; Contract</div>
+              <div class="field-row"><span class="field-label">Current POS</span><span class="field-value">Clover (POS + Clover Online)</span></div>
+              <div class="field-row"><span class="field-label">Renewal</span><span class="field-value">Aug 2026</span></div>
+              <div class="field-row"><span class="field-label">Terminals</span><span class="field-value">3 terminals</span></div>
+              <div class="field-row"><span class="field-label">Est. Monthly Rev.</span><span class="field-value">~$58,000 — neighborhood staple, loyal regulars</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Decision Maker</div>
+              <div class="field-row"><span class="field-label">Name / Role</span><span class="field-value">Susan King, Owner (15+ years in business)</span></div>
+              <div class="field-row"><span class="field-label">On-Site</span><span class="field-value">Yes — protective of her time; approach through staff introduction</span></div>
+              <div class="field-row"><span class="field-label">LinkedIn</span><span class="field-value">Not on social media at all</span></div>
+              <div class="field-row"><span class="field-label">POS Attitude</span><span class="field-value">Conservative — loyal to Clover out of familiarity; open to listening if approach is respectful</span></div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Pain Points</div>
+              <div class="pain-points-list">
+                <span class="pain-chip">Hardware aging out</span>
+                <span class="pain-chip">Rising transaction fees</span>
+                <span class="pain-chip">No loyalty punch card</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-group-title">Intelligence</div>
+              <div class="field-row"><span class="field-label">Last Contact</span><span class="field-value">Unknown</span></div>
+              <div class="field-row" style="align-items:flex-start;">
+                <span class="field-label">Pitch Angle</span>
+                <span class="field-value"><span class="pitch-angle-value">Chowbus loyalty punch card replacement is the foot in the door. Leave demo materials, return with Mandarin-speaking support as the trust signal.</span></span>
+              </div>
+              <div class="bd-notes-block">
+                <div class="bd-notes-label">BD Notes</div>
+                Long-tenured owner values trust over features. Build rapport through staff first; loyalty program angle is the best opener.
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div><!-- end .cards-grid -->
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    Chowbus Market Intelligence &middot; Ann Arbor, MI Chinese Restaurant Vertical &middot; 2026 &middot;
+    <strong style="color:#f43f5e;">All BD field data is fictional</strong>
+  </footer>
+
+<script>
+(function() {
+  var map = L.map('bd-map', { minZoom: 12, maxZoom: 13 }).setView([42.278, -83.730], 13);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 13,
+    minZoom: 12,
+    errorTileUrl: ''
+  }).addTo(map);
+
+  var restaurants = [
+    { priority: 1,    name: "Palace Tang",           lat: 42.3020, lng: -83.7270, temp: "HOT",  pos: "1771 Plymouth Rd",      pos_sys: "TouchBistro",        dm: "Richard Tang",    window: "Weekday afternoons",    note: "Renewal IMMINENT. DM already evaluating competitors." },
+    { priority: 2,    name: "TK Wu",                 lat: 42.2797, lng: -83.7417, temp: "HOT",  pos: "510 E Liberty St",      pos_sys: "Revel Systems",      dm: "Tommy Wu",        window: "2\u20134pm Mon\u2013Wed",         note: "Contract possibly lapsed. Approach with ready-to-sign offer." },
+    { priority: 3,    name: "Evergreen Downtown",     lat: 42.2797, lng: -83.7461, temp: "HOT",  pos: "208 W Liberty St",      pos_sys: "Toast",              dm: "Wei Zhang",       window: "2:30\u20134:30pm weekdays",  note: "Multi-location account \u2014 same owner as Evergreen Restaurant." },
+    { priority: "3b", name: "Evergreen Restaurant",  lat: 42.3051, lng: -83.6996, temp: "HOT",  pos: "2771 Plymouth Rd",      pos_sys: "Toast",              dm: "Kevin Liu (Mgr)", window: "2\u20134pm weekdays",         note: "Same owner as Downtown. One pitch, two locations." },
+    { priority: 4,    name: "Yee Siang Dumplings",   lat: 42.2577, lng: -83.6944, temp: "HOT",  pos: "4837 Washtenaw Ave",    pos_sys: "Square (free tier)", dm: "David Yee",       window: "2\u20135pm daily",             note: "Outgrowing free Square tier. Lead with loyalty program." },
+    { priority: 5,    name: "Gai's Kitchen",         lat: 42.2775, lng: -83.7489, temp: "WARM", pos: "423 S 4th Ave",         pos_sys: "Aloha by NCR",       dm: "Gai Huang",       window: "2:30\u20134pm Wed\u2013Fri",     note: "Never chose their POS. Digital-first pitch will land." },
+    { priority: 6,    name: "Lan City Noodle Bar",   lat: 42.2713, lng: -83.7397, temp: "WARM", pos: "1235 S University Ave", pos_sys: "Clover",             dm: "Mei Lin",         window: "3\u20135pm Tue\u2013Thu",        note: "Month-to-month. Pitch delivery integration." },
+    { priority: 7,    name: "Asian Legend",           lat: 42.2784, lng: -83.7426, temp: "WARM", pos: "516 E William St",      pos_sys: "Manesifu",           dm: "Amy Chen",        window: "2:30\u20134:30pm Tue\u2013Fri",  note: "Mandarin demo is critical. Amy is the key decision-maker." },
+    { priority: 8,    name: "China King",             lat: 42.2892, lng: -83.7863, temp: "COOL", pos: "3901 Jackson Rd",       pos_sys: "Clover",             dm: "Susan King",      window: "2\u20134pm Mon\u2013Thu",        note: "Relationship-first approach. Loyalty program is the opener." },
+    { priority: 9,    name: "King Shing",             lat: 42.2450, lng: -83.6799, temp: "COOL", pos: "2865 Carpenter Rd",     pos_sys: "Lightspeed",         dm: "Helen Shing",     window: "3\u20135pm weekdays",           note: "Contract until Jan 2027. Plant seed now for renewal." },
+  ];
+
+  var colorMap = {
+    'HOT':         '#dc2626',
+    'HOT-WARM':    '#ea7c1e',
+    'WARM-TO-HOT': '#ea7c1e',
+    'WARM':        '#ca8a04',
+    'COOL-WARM':   '#4a9a6e',
+    'COOL-TO-WARM':'#4a9a6e',
+    'COOL':        '#60a5fa'
+  };
+
+  restaurants.forEach(function(r) {
+    var color = colorMap[r.temp] || '#888';
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:' + color + ';width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;box-shadow:0 2px 6px rgba(0,0,0,0.25);line-height:28px;text-align:center;">' + r.priority + '</div>',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+    var popup = '<div style="font-family:Inter,system-ui,sans-serif;min-width:220px;background:#ffffff;color:#1f2937;padding:12px;border-radius:8px;">'
+      + '<strong style="font-size:13px;color:#1f2937;">' + r.name + '</strong>'
+      + '<span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' + color + ';color:white;">' + r.temp + '</span>'
+      + '<br><span style="color:#9ca3af;font-size:11px;margin-top:2px;display:block;">&#128205; ' + r.pos + '</span>'
+      + '<table style="margin-top:8px;font-size:11.5px;border-collapse:collapse;width:100%">'
+      + '<tr><td style="color:#9ca3af;padding:2px 8px 2px 0;white-space:nowrap;">POS</td><td style="color:#1f2937;">' + r.pos_sys + '</td></tr>'
+      + '<tr><td style="color:#9ca3af;padding:2px 8px 2px 0;white-space:nowrap;">DM</td><td style="color:#1f2937;">' + r.dm + '</td></tr>'
+      + '<tr><td style="color:#9ca3af;padding:2px 8px 2px 0;white-space:nowrap;">Visit</td><td style="color:#1f2937;">' + r.window + '</td></tr>'
+      + '</table>'
+      + '<div style="margin-top:8px;padding:6px 8px;background:#f9fafb;border-radius:4px;font-size:11px;color:#374151;border:1px solid #f3f4f6;">' + r.note + '</div>'
+      + '</div>';
+    L.marker([r.lat, r.lng], { icon: icon })
+      .bindPopup(popup, { maxWidth: 280, className: 'bd-popup' })
+      .addTo(map);
+  });
+})();
+</script>
+
+</body>
+</html>
